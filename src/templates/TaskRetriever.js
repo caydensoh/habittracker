@@ -1,6 +1,6 @@
 import { getDocs, collection, query, where } from "firebase/firestore";
-import { db } from "../firebase"; // Adjust the path as needed
-
+import { db } from "../firebase"; 
+import { Navigate } from "react-router-dom";
 // Function to fetch all main tasks for a given user UID
 export async function getAllMainTasks(userUID) {
     if (userUID) {
@@ -8,6 +8,24 @@ export async function getAllMainTasks(userUID) {
         return q.docs.map((doc) => {
             return { id: doc.id, ...doc.data() };
         });
+    }
+    else {
+        return undefined;
+    }
+}
+
+export async function getMainTask(taskID) {
+    if (taskID) {
+        const q = await getDocs(query(collection(db, "main_tasks",taskID)));
+        if (q.exists()) {
+            return q.docs.map((doc) => { console.log(doc.task_name);
+                return { id: doc.id, ...doc.data() };
+            });
+        }
+        else {
+            return 'no entry';
+        }
+        
     }
     else {
         return undefined;

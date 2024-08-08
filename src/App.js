@@ -4,6 +4,7 @@ import LoginPage from "./views/LoginPage";
 import SignUpPage from "./views/SignUpPage";
 import TaskPageAdd from "./views/TaskPageAdd";
 import TaskPageDetails from "./views/TaskPageDetails";
+import SubTaskPageAdd from "./views/SubTaskPageAdd";
 import ErrorPage from "./views/ErrorPage";
 //import PostPageUpdate from "./views/PostPageUpdate";//*/
 
@@ -16,6 +17,7 @@ function App() {
     { path: "/signup", element: <SignUpPage /> },
     { path: "/add", element: <TaskPageAdd /> },
     { path: "/task/:id", element: <TaskPageDetails /> },
+    { path: "/task/:id/add", element: <SubTaskPageAdd /> },
     //{ path: "/update/:id", element: <PostPageUpdate /> }//*/
     { path: "/*", element: <ErrorPage />}
   ]);

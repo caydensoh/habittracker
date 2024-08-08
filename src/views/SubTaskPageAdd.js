@@ -1,47 +1,52 @@
 
 import React, { useState, useEffect } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Spinner } from "react-bootstrap";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { db } from "../firebase"; 
+import { auth } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import SiteNav from "../templates/SiteNav";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function AddSubtaskForm() {
+export default function SubtaskPageAdd() {
+    const { id } = useParams();
+    const [user, loading] = useAuthState(auth);
+    const [userUID, setUserUID] = useState("");
+    const [userId, setUserId] = useState("");
     const [subtaskName, setSubtaskName] = useState("");
     const [priority, setPriority] = useState(1);
-    const [mainTasks, setMainTasks] = useState([]);
-    const [selectedMainTask, setSelectedMainTask] = useState("");
-
+    const [timeRequired, setTimeRequired] = useState("");
+    const navigate = useNavigate();
+    
     useEffect(() => {
-        const fetchMainTasks = async () => {
-            const querySnapshot = await getDocs(collection(db, "main_tasks"));
-            const tasks = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setMainTasks(tasks);
-        };
+        if (loading) return;
+        if (!user) return navigate("/signup");
+        setUserId(user.email);
+        setUserUID(user.uid);
+    }, [navigate, user, loading]);
 
-        fetchMainTasks();
-    }, []);
+    if (loading) {
+        return (
+            <Container className="text-center">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner>
+            </Container>
+        );
+    };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!selectedMainTask) {
-            alert("Please select a main task to add the subtask to.");
-            return;
-        }
-
         try {
-            const subTaskDocRef = await addDoc(collection(db, `main_tasks/${selectedMainTask}/sub_task`), {
+            const subTaskDocRef = await addDoc(collection(db, `main_tasks/${id}/sub_task`), {
                 subtask_name: subtaskName,
                 priority: priority,
                 completed: false,
             });
             console.log("Subtask added with ID: ", subTaskDocRef.id);
+            navigate(`/task/${id}`);
 
-            // Reset form fields
-            setSubtaskName("");
-            setPriority(1);
         } catch (e) {
             console.error("Error adding subtask: ", e);
         }
@@ -51,22 +56,6 @@ export default function AddSubtaskForm() {
         <Container>
             <h2>Add Subtask</h2>
             <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="mainTask">
-                    <Form.Label>Main Task</Form.Label>
-                    <Form.Control
-                        as="select"
-                        value={selectedMainTask}
-                        onChange={(e) => setSelectedMainTask(e.target.value)}
-                    >
-                        <option value="">Select a main task</option>
-                        {mainTasks.map((task) => (
-                            <option key={task.id} value={task.id}>
-                                {task.task_name}
-                            </option>
-                        ))}
-                    </Form.Control>
-                </Form.Group>
-
                 <Form.Group controlId="subtaskName">
                     <Form.Label>Subtask Name</Form.Label>
                     <Form.Control
@@ -85,10 +74,21 @@ export default function AddSubtaskForm() {
                         value={priority}
                         onChange={(e) => setPriority(Number(e.target.value))}
                     >
-                        <option value={1}>1 (High)</option>
+                        <option value={1}>1 (Low)</option>
                         <option value={2}>2 (Medium)</option>
-                        <option value={3}>3 (Low)</option>
+                        <option value={3}>3 (High)</option>
                     </Form.Control>
+                </Form.Group>
+
+                <Form.Group controlId="timeRequired">
+                    <Form.Label>Time Required</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={timeRequired}
+                        onChange={(e) => setTimeRequired(e.target.value)}
+                        placeholder="Enter time required"
+                        required
+                    />
                 </Form.Group>
 
                 <Button variant="primary" type="submit">

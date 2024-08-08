@@ -1,34 +1,53 @@
-import React, { useState } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Form, Button, Container, Spinner } from "react-bootstrap";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase"; 
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import SiteNav from "../templates/SiteNav";
 
 
 export default function TaskPageAdd() {
+    const [user, loading] = useAuthState(auth);
+    const [userUID, setUserUID] = useState("");
+    const [userId, setUserId] = useState("");
     const [taskName, setTaskName] = useState("");
     const [priority, setPriority] = useState(1);
     const [timeRequired, setTimeRequired] = useState("");
     const navigate = useNavigate();
+    
+    useEffect(() => {
+        if (loading) return;
+        if (!user) return navigate("/signup");
+        setUserId(user.email);
+        setUserUID(user.uid);
+    }, [navigate, user, loading]);
 
-    async function addTask(e) {
-        e.preventDefault();
+    if (loading) {
+        return (
+            <Container className="text-center">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner>
+            </Container>
+        );
+    };
 
-        try {
-            await addDoc(collection(db, "main_tasks"), {
-                task_name: taskName,
-                priority: priority,
-                time_required: timeRequired,
-                completed: false,
-                user_uid: "your-user-uid", // Replace with actual user UID from authentication
-            });
-            navigate("/");
-        } catch (e) {
-            console.error("Error adding task: ", e);
-        }
+    async function addTask() {
+        await addDoc(collection(db, "main_tasks"), {
+            task_name: taskName,
+            priority: priority,
+            time_required: timeRequired,
+            completed: false,
+            user_uid: userUID, 
+        });
+        navigate("/");
     };
 
     return (
+        <>
+        <SiteNav email={userId}/>
         <Container>
             <h2>Add Main Task</h2>
             <Form>
@@ -72,5 +91,6 @@ export default function TaskPageAdd() {
                 </Button>
             </Form>
         </Container>
+        </>
     );
 }

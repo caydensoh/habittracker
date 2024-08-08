@@ -24,6 +24,7 @@ export default function HomePage() {
     }, [userUID]);
 
     useEffect(() => {
+        if (loading) return;
         if (!user) return navigate("/signup");
         setUserId(user.email);
         setUserUID(user.uid);
@@ -40,7 +41,7 @@ export default function HomePage() {
     };
 
     const TaskRow = () => {
-        return mainTasks.map((main_task, index) => <MainTaskDropdown key = {index} mainTask={main_task}/> )
+        return mainTasks.map((main_task, index) => <><MainTaskDropdown key = {index} mainTask={main_task}/><p></p></> )
     }
     
     return (
@@ -56,7 +57,6 @@ export default function HomePage() {
 function MainTaskDropdown({ mainTask }) { //creates a single dropdown entry for the specified task
     const [subTasks, setSubTasks] = useState([]);
     const { task_name, id, time_required, priority, completed } = mainTask;
-
     useEffect(() => {
         const fetchSubTasks = async () => {
             const fetchedSubTasks = await getSubTasks(id);

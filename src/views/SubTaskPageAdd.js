@@ -53,6 +53,8 @@ export default function SubtaskPageAdd() {
     };
 
     return (
+        <>
+        <SiteNav email={userId}/>
         <Container>
             <h2>Add Subtask</h2>
             <Form onSubmit={handleSubmit}>
@@ -96,5 +98,6 @@ export default function SubtaskPageAdd() {
                 </Button>
             </Form>
         </Container>
+        </>
     );
 }

@@ -1,6 +1,5 @@
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../firebase"; 
-import { Navigate } from "react-router-dom";
 // Function to fetch all main tasks for a given user UID
 export async function getAllMainTasks(userUID) {
     if (userUID) {
